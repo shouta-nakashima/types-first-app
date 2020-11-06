@@ -31,9 +31,31 @@ var ProjectInput = /** @class */ (function () {
         this.configure();
         this.attach();
     }
+    ProjectInput.prototype.gatherUserinput = function () {
+        var enteredTitle = this.titleInputElement.value;
+        var enteredDescription = this.descriptionInputElement.value;
+        var enteredManday = this.mandayElement.value;
+        if (enteredTitle.trim().length === 0 || enteredDescription.trim().length === 0 || enteredManday.trim().length === 0) {
+            alert('入力が正しくありません。');
+            return;
+        }
+        else {
+            return [enteredTitle, enteredDescription, +enteredManday];
+        }
+    };
+    ProjectInput.prototype.clearInput = function () {
+        this.titleInputElement.value = "";
+        this.descriptionInputElement.value = "";
+        this.mandayElement.value = "";
+    };
     ProjectInput.prototype.submitHandler = function (event) {
         event.preventDefault();
-        console.log(this.titleInputElement.value);
+        var userinput = this.gatherUserinput();
+        if (Array.isArray(userinput)) {
+            var title = userinput[0], description = userinput[1], manday = userinput[2];
+            console.log(title, description, manday);
+            this.clearInput();
+        }
     };
     ProjectInput.prototype.configure = function () {
         this.element.addEventListener('submit', this.submitHandler);
