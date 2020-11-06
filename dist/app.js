@@ -5,24 +5,43 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+function validate(validatableInput) {
+    let isValid = true;
+    if (validatableInput.required) {
+        isValid = isValid && validatableInput.value.toString().trim().length !== 0;
+    }
+    if (validatableInput.minLength != null && typeof validatableInput.value === 'string') {
+        isValid && validatableInput.value.length >= validatableInput.minLength;
+    }
+    if (validatableInput.maxLength != null && typeof validatableInput.value === 'string') {
+        isValid && validatableInput.value.length <= validatableInput.maxLength;
+    }
+    if (validatableInput.min != null && typeof validatableInput.value === 'number') {
+        isValid && validatableInput.value >= validatableInput.min;
+    }
+    if (validatableInput.max != null && typeof validatableInput.value === 'number') {
+        isValid && validatableInput.value <= validatableInput.max;
+    }
+    return isValid;
+}
 //autobind decoretor
 function autobind(target, methodName, descripter) {
-    var originalMethods = descripter.value;
-    var abjDescriptor = {
+    const originalMethods = descripter.value;
+    const abjDescriptor = {
         configurable: true,
-        get: function () {
-            var boundFn = originalMethods.bind(this);
+        get() {
+            const boundFn = originalMethods.bind(this);
             return boundFn;
         }
     };
     return abjDescriptor;
 }
 // ProjectInput class
-var ProjectInput = /** @class */ (function () {
-    function ProjectInput() {
+class ProjectInput {
+    constructor() {
         this.templateElement = document.getElementById("project-input");
         this.hostElement = document.getElementById("app");
-        var importedNode = document.importNode(this.templateElement.content, true);
+        const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
         this.element.id = "user-input";
         this.titleInputElement = this.element.querySelector("#title");
@@ -31,41 +50,55 @@ var ProjectInput = /** @class */ (function () {
         this.configure();
         this.attach();
     }
-    ProjectInput.prototype.gatherUserinput = function () {
-        var enteredTitle = this.titleInputElement.value;
-        var enteredDescription = this.descriptionInputElement.value;
-        var enteredManday = this.mandayElement.value;
-        if (enteredTitle.trim().length === 0 || enteredDescription.trim().length === 0 || enteredManday.trim().length === 0) {
+    gatherUserinput() {
+        const enteredTitle = this.titleInputElement.value;
+        const enteredDescription = this.descriptionInputElement.value;
+        const enteredManday = this.mandayElement.value;
+        const titleValidatable = {
+            value: enteredTitle,
+            required: true,
+        };
+        const descriptionValidatable = {
+            value: enteredDescription,
+            required: true,
+            minLength: 5
+        };
+        const mandayValidatable = {
+            value: +enteredManday,
+            required: true,
+            min: 1,
+            max: 1000
+        };
+        if (!validate(titleValidatable) || !validate(descriptionValidatable) || !validate(mandayValidatable)) {
             alert('入力が正しくありません。');
             return;
         }
         else {
             return [enteredTitle, enteredDescription, +enteredManday];
         }
-    };
-    ProjectInput.prototype.clearInput = function () {
+    }
+    clearInput() {
         this.titleInputElement.value = "";
         this.descriptionInputElement.value = "";
         this.mandayElement.value = "";
-    };
-    ProjectInput.prototype.submitHandler = function (event) {
+    }
+    submitHandler(event) {
         event.preventDefault();
-        var userinput = this.gatherUserinput();
+        const userinput = this.gatherUserinput();
         if (Array.isArray(userinput)) {
-            var title = userinput[0], description = userinput[1], manday = userinput[2];
+            const [title, description, manday] = userinput;
             console.log(title, description, manday);
             this.clearInput();
         }
-    };
-    ProjectInput.prototype.configure = function () {
+    }
+    configure() {
         this.element.addEventListener('submit', this.submitHandler);
-    };
-    ProjectInput.prototype.attach = function () {
+    }
+    attach() {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);
-    };
-    __decorate([
-        autobind
-    ], ProjectInput.prototype, "submitHandler", null);
-    return ProjectInput;
-}());
-var prjInput = new ProjectInput();
+    }
+}
+__decorate([
+    autobind
+], ProjectInput.prototype, "submitHandler", null);
+const prjInput = new ProjectInput();
